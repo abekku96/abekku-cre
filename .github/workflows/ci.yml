@@ -1,4 +1,4 @@
-name: CI & Deploy
+name: CI
 
 on:
   pull_request:
@@ -7,9 +7,7 @@ on:
       - edited
       - synchronize
       - reopened
-  push:
-    branches:
-      - main # デプロイを実行するブランチを指定
+  workflow_call:
 
 jobs:
   build:
@@ -42,28 +40,3 @@ jobs:
 
       - name: "🚀 Build the project"
         run: npm run build
-
-  deploy:
-    name: Deploy to Cloudflare Pages
-    runs-on: ubuntu-latest
-    needs: build # ビルドジョブが成功した後に実行
-
-    steps:
-      - name: "☁️ Checkout repository"
-        uses: actions/checkout@v4
-
-      - name: "🔧 Setup Node.js 18.x"
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-          cache: "npm"
-
-      - name: "📦 Install dependencies"
-        run: npm ci
-
-      - name: "🚀 Deploy to Cloudflare Pages"
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: deploy dist
